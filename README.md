@@ -5,7 +5,7 @@ Aplicativo de gestão e geolocalização para Microempreendedores Individuais (M
 Projeto de Extensão Universitária II — Bacharelado em Sistemas de Informação, Instituto Federal Catarinense (Campus Camboriú), 2026.2.
 
 - **Aluno:** Elionay Matias
-- **Professor:** André Fabiano de Moraes
+- **Professor:** André Fabiano de Moraes e Filipe William Canello de Almeida
 
 ## O problema
 
