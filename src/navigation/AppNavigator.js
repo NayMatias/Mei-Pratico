@@ -1,5 +1,6 @@
 /**
- * Fluxo de navegação entre as telas — etapa 2 do cronograma (18/08 a 31/08).
+ * Fluxo de navegação entre as telas.
+ * Criado na etapa 2 (18/08 a 31/08); as telas de recibo e de perfil entraram na etapa 7.
  */
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -12,6 +13,8 @@ import RotaScreen from '../screens/RotaScreen';
 import ClientesScreen from '../screens/ClientesScreen';
 import ClienteFormScreen from '../screens/ClienteFormScreen';
 import HistoricoScreen from '../screens/HistoricoScreen';
+import ReciboScreen from '../screens/ReciboScreen';
+import PerfilScreen from '../screens/PerfilScreen';
 import { cores } from '../theme/cores';
 
 const Stack = createNativeStackNavigator();
@@ -35,7 +38,9 @@ export default function AppNavigator({ rotaInicial = 'BoasVindas' }) {
       <Stack.Screen name="Rota" component={RotaScreen} options={{ title: 'Rota até o cliente' }} />
       <Stack.Screen name="Clientes" component={ClientesScreen} options={{ title: 'Clientes' }} />
       <Stack.Screen name="ClienteForm" component={ClienteFormScreen} options={{ title: 'Cliente' }} />
-      <Stack.Screen name="Historico" component={HistoricoScreen} options={{ title: 'Histórico' }} />
+      <Stack.Screen name="Historico" component={HistoricoScreen} options={{ title: 'Histórico e recibos' }} />
+      <Stack.Screen name="Recibo" component={ReciboScreen} options={{ title: 'Recibo' }} />
+      <Stack.Screen name="Perfil" component={PerfilScreen} options={{ title: 'Meus dados' }} />
     </Stack.Navigator>
   );
 }

@@ -1,9 +1,12 @@
 /**
  * Banco de dados local (SQLite) do MEI Prático.
  *
- * Etapa 6 do cronograma (13/10 a 26/10) — EM ANDAMENTO.
- * Os dados ficam salvos no próprio celular, então o app funciona mesmo sem internet
+ * Os dados ficam salvos no próprio celular. Assim o app funciona mesmo sem internet
  * e as informações dos clientes não saem do aparelho (LGPD).
+ *
+ * Versões do banco (PRAGMA user_version):
+ *  - 1: tabelas iniciais (etapa 6)
+ *  - 2: cidade e chave Pix do prestador, usadas no recibo (etapa 7)
  *
  * Tabelas:
  *  - prestador     -> dados do MEI (cadastro rápido, um único registro)
@@ -77,6 +80,27 @@ export async function iniciarBanco() {
 
     CREATE INDEX IF NOT EXISTS idx_atendimentos_data ON atendimentos(data);
   `);
+
+  await migrarBanco(db);
+}
+
+/**
+ * Atualiza o banco de quem já tinha o app instalado, sem perder os dados.
+ * Cada passo só roda uma vez, controlado pelo PRAGMA user_version.
+ */
+async function migrarBanco(db) {
+  const linha = await db.getFirstAsync('PRAGMA user_version');
+  let versao = linha?.user_version ?? 0;
+
+  if (versao < 2) {
+    const colunas = await db.getAllAsync('PRAGMA table_info(prestador)');
+    const nomes = colunas.map((c) => c.name);
+    if (!nomes.includes('cidade')) await db.execAsync('ALTER TABLE prestador ADD COLUMN cidade TEXT');
+    if (!nomes.includes('chave_pix')) await db.execAsync('ALTER TABLE prestador ADD COLUMN chave_pix TEXT');
+    versao = 2;
+  }
+
+  await db.execAsync(`PRAGMA user_version = ${versao}`);
 }
 
 /* ---------------- Prestador ---------------- */
@@ -86,13 +110,14 @@ export async function buscarPrestador() {
   return db.getFirstAsync('SELECT * FROM prestador WHERE id = 1');
 }
 
-export async function salvarPrestador({ nome, cnpj, telefone, atividade }) {
+export async function salvarPrestador({ nome, cnpj, telefone, atividade, cidade = null, chavePix = null }) {
   const db = await abrirBanco();
   await db.runAsync(
-    `INSERT INTO prestador (id, nome, cnpj, telefone, atividade) VALUES (1, ?, ?, ?, ?)
+    `INSERT INTO prestador (id, nome, cnpj, telefone, atividade, cidade, chave_pix) VALUES (1, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET nome = excluded.nome, cnpj = excluded.cnpj,
-       telefone = excluded.telefone, atividade = excluded.atividade`,
-    [nome, cnpj, telefone, atividade]
+       telefone = excluded.telefone, atividade = excluded.atividade,
+       cidade = excluded.cidade, chave_pix = excluded.chave_pix`,
+    [nome, cnpj || null, telefone || null, atividade, cidade || null, chavePix || null]
   );
 }
 
@@ -204,14 +229,43 @@ export async function finalizarAtendimento(id, { valorRecebido, formaPagamento, 
 
 /**
  * Histórico de atendimentos concluídos de um mês ("AAAA-MM").
- * TODO (etapa 6): filtro por cliente e por período personalizado.
+ * Se receber clienteId, mostra só os atendimentos daquele cliente.
+ * Também devolve o total recebido e quanto ficou pendente (fiado).
  */
-export async function listarHistorico(anoMes) {
+export async function listarHistorico(anoMes, clienteId = null) {
   const db = await abrirBanco();
+  const filtros = [`a.status = 'concluido'`, 'substr(a.data, 1, 7) = ?'];
+  const parametros = [anoMes];
+  if (clienteId) {
+    filtros.push('a.cliente_id = ?');
+    parametros.push(clienteId);
+  }
+
   const itens = await db.getAllAsync(
-    `${SELECT_ATENDIMENTO} WHERE a.status = 'concluido' AND substr(a.data, 1, 7) = ? ORDER BY a.data DESC, a.hora DESC`,
+    `${SELECT_ATENDIMENTO} WHERE ${filtros.join(' AND ')} ORDER BY a.data DESC, a.hora DESC`,
+    parametros
+  );
+
+  const valorDe = (item) => item.valor_recebido ?? item.valor ?? 0;
+  const pendentes = itens.filter((i) => i.forma_pagamento === 'Pendente');
+  const total = itens.filter((i) => i.forma_pagamento !== 'Pendente').reduce((soma, i) => soma + valorDe(i), 0);
+  const aReceber = pendentes.reduce((soma, i) => soma + valorDe(i), 0);
+
+  return { itens, total, aReceber };
+}
+
+/** Marca como pago um atendimento que tinha ficado "Pendente". */
+export async function registrarPagamento(id, formaPagamento) {
+  const db = await abrirBanco();
+  await db.runAsync('UPDATE atendimentos SET forma_pagamento = ? WHERE id = ?', [formaPagamento, id]);
+}
+
+/** Clientes que têm pelo menos um atendimento concluído no mês (para o filtro do histórico). */
+export async function listarClientesDoMes(anoMes) {
+  const db = await abrirBanco();
+  return db.getAllAsync(
+    `SELECT DISTINCT c.id, c.nome FROM atendimentos a JOIN clientes c ON c.id = a.cliente_id
+     WHERE a.status = 'concluido' AND substr(a.data, 1, 7) = ? ORDER BY c.nome COLLATE NOCASE`,
     [anoMes]
   );
-  const total = itens.reduce((soma, item) => soma + (item.valor_recebido ?? item.valor ?? 0), 0);
-  return { itens, total };
 }

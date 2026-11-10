@@ -1,6 +1,6 @@
 /**
  * Formulário de finalização de atendimento — etapa 3 (01/09 a 14/09).
- * O recibo digital em PDF entra na etapa 7 (27/10 a 09/11).
+ * Ao terminar, abre a tela de recibo (etapa 7).
  */
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -52,9 +52,8 @@ export default function FinalizarScreen({ route, navigation }) {
         formaPagamento: forma,
         observacoesFinais: observacoes.trim(),
       });
-      Alert.alert('Atendimento finalizado ✅', `${formatarMoeda(lerValor(valor))} recebido via ${forma}.`, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      // Vai direto para o recibo, que é o próximo passo natural depois de terminar o serviço
+      navigation.replace('Recibo', { atendimentoId });
     } catch (erro) {
       Alert.alert('Erro', 'Não foi possível finalizar o atendimento.');
       console.warn(erro);
@@ -100,7 +99,7 @@ export default function FinalizarScreen({ route, navigation }) {
         />
 
         <Botao titulo="Finalizar atendimento" onPress={concluir} carregando={salvando} />
-        <Text style={estilos.aviso}>O recibo digital em PDF e o atalho para a NFS-e chegam na próxima versão.</Text>
+        <Text style={estilos.aviso}>Na próxima tela você gera o recibo em PDF e prepara a NFS-e.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

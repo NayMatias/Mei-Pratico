@@ -62,8 +62,8 @@ export default function InicioScreen({ navigation }) {
       <View style={estilos.grade}>
         <Cartao icone="🗺️" titulo="Mapa do dia" subtitulo="Clientes e rotas" onPress={() => navigation.navigate('Mapa')} style={estilos.item} />
         <Cartao icone="👥" titulo="Clientes" subtitulo="Cadastro rápido" onPress={() => navigation.navigate('Clientes')} style={estilos.item} />
-        <Cartao icone="📒" titulo="Histórico" subtitulo="Serviços feitos" onPress={() => navigation.navigate('Historico')} style={estilos.item} />
-        <Cartao icone="🧾" titulo="Recibos" subtitulo="Em breve" etiqueta="v0.7" desabilitado onPress={() => {}} style={estilos.item} />
+        <Cartao icone="🧾" titulo="Histórico" subtitulo="Recibos e ganhos" onPress={() => navigation.navigate('Historico')} style={estilos.item} />
+        <Cartao icone="👤" titulo="Meus dados" subtitulo="Perfil e Pix" onPress={() => navigation.navigate('Perfil')} style={estilos.item} />
       </View>
 
       <Text style={estilos.secao}>Atendimentos de hoje</Text>
@@ -79,6 +79,7 @@ export default function InicioScreen({ navigation }) {
               titulo={`${a.hora ? a.hora + ' · ' : ''}${a.cliente_nome}`}
               subtitulo={`${a.descricao} · ${formatarMoeda(concluido ? a.valor_recebido : a.valor)}`}
               etiqueta={concluido ? 'Concluído' : 'Agendado'}
+              onPress={concluido ? () => navigation.navigate('Recibo', { atendimentoId: a.id }) : undefined}
             >
               {!concluido && (
                 <View style={estilos.acoes}>
