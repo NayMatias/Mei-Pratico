@@ -2,17 +2,14 @@
 
 Cada versão corresponde a uma etapa do cronograma do projeto.
 
-## v1.0.1 — Correção do mapa (26/11/2026)
-- O mapa passou a usar o mapa nativo do celular (Google Maps no Android, Apple Maps no iPhone), porque o servidor do OpenStreetMap bloqueava o app com "Access blocked".
-- Código limpo, sem comentários longos.
-
-## v1.0.0 — Recibos e apoio à NFS-e (02/11/2026)
+## v1.0.0 — Versão final
+- Mapa nativo do celular (Google Maps no Android, Apple Maps no iPhone).
 - Fim da etapa de armazenamento: histórico com filtro por cliente, resumo do mês separando o recebido do que falta receber, e toque no serviço para abrir o recibo.
 - Tela de recibo que abre logo depois de finalizar o atendimento.
 - Recibo em PDF com número, valor por extenso e assinatura, enviado pelo menu de compartilhar do celular (WhatsApp, e-mail...).
 - Botão que copia os dados da nota e atalho para o Emissor Nacional da NFS-e (gov.br).
 - Serviços "pendentes" podem ser marcados como pagos depois, direto no recibo.
-- Nova tela "Meus dados": editar perfil, cidade e chave Pix (usados no recibo).
+- Nova tela "Meus dados": editar perfil, cidade e chave Pix (usados no recibo), e botão para apagar os dados e começar de novo com outro usuário.
 - Banco atualizado com migração automática (`PRAGMA user_version`), sem perder o que já estava salvo.
 - 11 testes automáticos para as regras do app (`npm test`).
 

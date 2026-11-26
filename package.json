@@ -1,6 +1,6 @@
 {
   "name": "mei-pratico",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Plataforma de gestão e geolocalização para MEI com atendimento domiciliar - Projeto de Extensão Universitária II (IFC Camboriú)",
   "main": "index.js",
   "private": true,
